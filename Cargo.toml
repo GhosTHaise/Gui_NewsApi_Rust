@@ -1,6 +1,5 @@
 [workspace]
-
-members = {
+members = [
     "newsApi",
     "headlines"
-}
+]
