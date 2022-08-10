@@ -4,7 +4,7 @@ const PADDING : f32 = 5.0;
 const WHITE: Color32 = Color32::from_rgb(255, 255, 255);
 const CYAN: Color32 = Color32::from_rgb(0, 250, 250);
 
-use eframe::{egui::{CentralPanel, ScrollArea, Vec2, FontDefinitions, FontFamily, Color32, Label, Layout, Hyperlink, Separator},epi::App,run_native, NativeOptions};
+use eframe::{egui::{CentralPanel, ScrollArea, Vec2, FontDefinitions, FontFamily, Color32, Label, Layout, Hyperlink, Separator, Ui},epi::App,run_native, NativeOptions};
 struct Headlines{
     articles : Vec<NewsCardData>,
 }
@@ -78,6 +78,7 @@ impl App for Headlines{
     }
     fn update(&mut self, ctx: &eframe::egui::CtxRef, frame: &mut eframe::epi::Frame<'_>) {
         CentralPanel::default().show(ctx, |ui|{
+            render_header(ui);
             ScrollArea::auto_sized().show(ui, |ui|{
                 self.render_news_cards(ui);
             });
@@ -87,6 +88,19 @@ impl App for Headlines{
     fn name(&self) -> &str {
         "Headlines by GhosT v1.0"
     }
+}
+
+fn render_footer(ui : &mut Ui) -> () {
+    
+}
+
+fn render_header(ui : &mut Ui) -> () {
+    ui.vertical_centered(|ui|{
+            ui.heading("headlines");
+    });
+    ui.add_space(PADDING);
+    let sep = Separator::default().spacing(20.);
+    ui.add(sep);
 }
 fn main() -> () {
     let app = Headlines::new();
