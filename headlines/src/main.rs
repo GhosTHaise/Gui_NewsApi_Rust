@@ -4,7 +4,7 @@ const PADDING : f32 = 5.0;
 const WHITE: Color32 = Color32::from_rgb(255, 255, 255);
 const CYAN: Color32 = Color32::from_rgb(0, 250, 250);
 
-use eframe::{egui::{CentralPanel, ScrollArea, Vec2, FontDefinitions, FontFamily, Color32, Label, Layout, Hyperlink, Separator, Ui},epi::App,run_native, NativeOptions};
+use eframe::{egui::{CentralPanel, ScrollArea, Vec2, FontDefinitions, FontFamily, Color32, Label, Layout, Hyperlink, Separator, Ui, TopBottomPanel, CtxRef, TextStyle},epi::App,run_native, NativeOptions};
 struct Headlines{
     articles : Vec<NewsCardData>,
 }
@@ -82,6 +82,7 @@ impl App for Headlines{
             ScrollArea::auto_sized().show(ui, |ui|{
                 self.render_news_cards(ui);
             });
+            render_footer(ctx);
         });
     }
 
@@ -90,8 +91,26 @@ impl App for Headlines{
     }
 }
 
-fn render_footer(ui : &mut Ui) -> () {
-    
+fn render_footer(ctx : &CtxRef) -> () {
+    TopBottomPanel::bottom("footer").show(ctx, |ui|{
+        ui.vertical_centered(|ui|{
+            ui.add_space(10.);
+            //add api source
+            ui.add(Label::new("API source : newsapi.org")
+                .text_color(Color32::from_rgb(160,10,0))
+                .monospace());
+            //add link to egui framwork
+            ui.add(Hyperlink::new("https://github.com/emilk/egui")
+                    .text("Made with egui")
+                    .text_style(TextStyle::Monospace));
+            //put github link to source code
+            ui.add(Hyperlink::new("https://github.com/GhosTHaise/Gui_NewsApi_Rust")
+                    .text("GhosTHaise/Gui_NewsApi_Rust")
+                    .text_style(TextStyle::Monospace));
+            
+            ui.add_space(10.)
+        });
+    });
 }
 
 fn render_header(ui : &mut Ui) -> () {
@@ -105,6 +124,6 @@ fn render_header(ui : &mut Ui) -> () {
 fn main() -> () {
     let app = Headlines::new();
     let mut win_options = NativeOptions::default();
-    win_options.initial_window_size = Some(Vec2::new(600., 600.));
+    win_options.initial_window_size = Some(Vec2::new(600., 650.));
     run_native(Box::new(app),win_options);
 }
