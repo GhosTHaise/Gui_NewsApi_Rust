@@ -1,6 +1,6 @@
 
 use std::{borrow::Cow};
-use eframe::{egui::{FontDefinitions, FontFamily, Color32, Label, Layout, Hyperlink, Separator, Ui, TopBottomPanel, CtxRef, TextStyle, self}};
+use eframe::{egui::{FontDefinitions, FontFamily, Color32, Label, Layout, Hyperlink, Separator, Ui, TopBottomPanel, CtxRef, TextStyle, self, Button}};
 
 const PADDING : f32 = 5.0;
 const WHITE: Color32 = Color32::from_rgb(255, 255, 255);
@@ -61,20 +61,28 @@ impl Headlines {
     pub(crate) fn render_top_panel(&self,ctx : &CtxRef) -> () {
         //define a topBottomPanel wodget
         TopBottomPanel::top("top_panel").show(ctx, |ui|{
+            //then two layout widgets
+            ui.add_space(10.);
             egui::menu::bar(ui,|ui|{
+                //render the logo on the left
                 ui.with_layout(Layout::left_to_right(), |ui|{
                     ui.add(Label::new("📓").text_style(egui::TextStyle::Heading));
                 });
+                //button controller on the right
                 ui.with_layout(Layout::right_to_left(), |ui|{
-                    let close_btn = ui.add(Button::new())
-                });
+                    let close_btn = ui.add(Button::new("❌").text_style(egui::TextStyle::Body));
+                    let refresh_btn = ui.add(Button::new("🔄").text_style(egui::TextStyle::Body));
+                    let theme_btn = ui.add(Button::new("🌙").text_style(egui::TextStyle::Body));
+                }); 
+                //padding before after the pannel
+                ui.add_space(10.);
             })
         });
         //add a menu bar
-        //then two layout widgets
-        //render the logo on the left
-        //button controller on the right
-        //padding before after the pannel
+        
+        
+        
+      
     }
 
 }
