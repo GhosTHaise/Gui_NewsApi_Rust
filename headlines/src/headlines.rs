@@ -40,7 +40,7 @@ impl Headlines {
             //Add padding top
             ui.add_space(PADDING);
             //render title
-            let title = format!("‣ {}",a.title);
+            let title = format!("🔹 {}",a.title);
             ui.colored_label(WHITE, title);
             
             //render desc
@@ -52,7 +52,7 @@ impl Headlines {
             ui.style_mut().visuals.hyperlink_color = CYAN;
             ui.add_space(PADDING);
             ui.with_layout(Layout::right_to_left(), |ui|{
-                ui.add(Hyperlink::new(&a.url).text("read more ⇾"))
+                ui.add(Hyperlink::new(&a.url).text("read more 🔜"))
             });
             ui.add_space(PADDING);
             ui.add(Separator::default());
@@ -75,8 +75,9 @@ impl Headlines {
                     let theme_btn = ui.add(Button::new("🌙").text_style(egui::TextStyle::Body));
                 }); 
                 //padding before after the pannel
-                ui.add_space(10.);
-            })
+                
+            });
+            ui.add_space(15.);
         });
         //add a menu bar
         
