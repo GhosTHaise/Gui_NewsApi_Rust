@@ -1,15 +1,26 @@
 
 use std::{borrow::Cow};
 use eframe::{egui::{FontDefinitions, FontFamily, Color32, Label, Layout, Hyperlink, Separator, Ui, TopBottomPanel, CtxRef, TextStyle, self, Button}};
+use serde::{Serialize,Deserialize};
 
 const PADDING : f32 = 5.0;
 const WHITE: Color32 = Color32::from_rgb(255, 255, 255);
 const CYAN: Color32 = Color32::from_rgb(0, 250, 250);
 const BLACK : Color32 =  Color32::from_rgb(0, 0, 0) ;
 
+#[derive(Serialize,Deserialize)]
 pub struct HeadlinesConfig {
    pub  dark_mode: bool
 }
+
+impl Default for HeadlinesConfig{
+    fn default() -> Self {
+        Self { 
+            dark_mode: Default::default()
+         }
+    }
+}
+
 impl HeadlinesConfig {
     fn new() -> Self {
         Self { 
@@ -29,9 +40,11 @@ impl Headlines {
             desc: format!("desc{}",a),
             url: format!("https://example.com/{}",a)
         });
+
+        let config : HeadlinesConfig = confy::load("headlines").unwrap_or_default();
         Headlines { 
             articles : Vec::from_iter(iter),
-            config : HeadlinesConfig::new()
+            config 
          }
     }
     pub fn configure_fonts(&self,ctx: &eframe::egui::CtxRef) -> () {
