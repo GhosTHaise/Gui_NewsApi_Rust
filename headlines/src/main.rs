@@ -1,6 +1,6 @@
 mod headlines;
 
-use eframe::{epi::App, egui::{CentralPanel, ScrollArea, Vec2}, NativeOptions, run_native};
+use eframe::{epi::App, egui::{CentralPanel, ScrollArea, Vec2, Visuals}, NativeOptions, run_native};
 use headlines::{Headlines, render_header, render_footer};
 
 impl App for Headlines{
@@ -13,6 +13,12 @@ impl App for Headlines{
         self.configure_fonts(ctx);
     }
     fn update(&mut self, ctx: &eframe::egui::CtxRef, frame: &mut eframe::epi::Frame<'_>) {
+
+        if self.config.dark_mode {
+            ctx.set_visuals(Visuals::dark());
+        }else{
+            ctx.set_visuals(Visuals::light());
+        }
         self.render_top_panel(ctx,frame); 
         CentralPanel::default().show(ctx, |ui|{
             render_header(ui);

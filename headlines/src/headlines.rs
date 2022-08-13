@@ -5,10 +5,10 @@ use eframe::{egui::{FontDefinitions, FontFamily, Color32, Label, Layout, Hyperli
 const PADDING : f32 = 5.0;
 const WHITE: Color32 = Color32::from_rgb(255, 255, 255);
 const CYAN: Color32 = Color32::from_rgb(0, 250, 250);
+const BLACK : Color32 =  Color32::from_rgb(0, 0, 0) ;
 
-
-struct HeadlinesConfig {
-    dark_mode: bool
+pub struct HeadlinesConfig {
+   pub  dark_mode: bool
 }
 impl HeadlinesConfig {
     fn new() -> Self {
@@ -20,7 +20,7 @@ impl HeadlinesConfig {
 
 pub struct Headlines{
     articles : Vec<NewsCardData>,
-    config : HeadlinesConfig
+    pub config : HeadlinesConfig
 }
 impl Headlines {
     pub fn new() -> Headlines {
@@ -41,7 +41,7 @@ impl Headlines {
         font_def.font_data.insert("Spartan".to_string(), Cow::Borrowed(include_bytes!("../../Spartan-VariableFont_wght.ttf")));
         // then set the sowe of different text styles
         font_def.family_and_size.insert(eframe::egui::TextStyle::Heading,(FontFamily::Proportional,35.));
-        font_def.family_and_size.insert(eframe::egui::TextStyle::Body,(FontFamily::Proportional,20.));
+        font_def.family_and_size.insert(eframe::egui::TextStyle::Body,(FontFamily::Proportional,16.));
         
         font_def.fonts_for_family.get_mut(&FontFamily::Proportional)
                                  .unwrap()
@@ -56,7 +56,11 @@ impl Headlines {
             ui.add_space(PADDING);
             //render title
             let title = format!("🔹 {}",a.title);
-            ui.colored_label(WHITE, title);
+            if self.config.dark_mode {
+                ui.colored_label(BLACK, title);
+            }else{
+                ui.colored_label(WHITE, title);
+            }
             
             //render desc
             ui.add_space(PADDING);
@@ -90,7 +94,13 @@ impl Headlines {
                         frame.quit();
                     }
                     let refresh_btn = ui.add(Button::new("🔄").text_style(egui::TextStyle::Body));
-                    let theme_btn = ui.add(Button::new("🌙").text_style(egui::TextStyle::Body));
+                    let theme_btn = ui.add(Button::new({
+                        if self.config.dark_mode {
+                            "🌞"
+                        }else{
+                            "🌙"
+                        }
+                    }).text_style(egui::TextStyle::Body));
                     if(theme_btn.clicked()){
                         self.config.dark_mode = !self.config.dark_mode;
                     }
