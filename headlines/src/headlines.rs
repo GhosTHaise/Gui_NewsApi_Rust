@@ -5,8 +5,22 @@ use eframe::{egui::{FontDefinitions, FontFamily, Color32, Label, Layout, Hyperli
 const PADDING : f32 = 5.0;
 const WHITE: Color32 = Color32::from_rgb(255, 255, 255);
 const CYAN: Color32 = Color32::from_rgb(0, 250, 250);
+
+
+struct HeadlinesConfig {
+    dark_mode: bool
+}
+impl HeadlinesConfig {
+    fn new() -> Self {
+        Self { 
+            dark_mode: true 
+        }
+    }
+}
+
 pub struct Headlines{
     articles : Vec<NewsCardData>,
+    config : HeadlinesConfig
 }
 impl Headlines {
     pub fn new() -> Headlines {
@@ -16,7 +30,8 @@ impl Headlines {
             url: format!("https://example.com/{}",a)
         });
         Headlines { 
-            articles : Vec::from_iter(iter)
+            articles : Vec::from_iter(iter),
+            config : HeadlinesConfig::new()
          }
     }
     pub fn configure_fonts(&self,ctx: &eframe::egui::CtxRef) -> () {
@@ -58,7 +73,7 @@ impl Headlines {
             ui.add(Separator::default());
         }
     }
-    pub(crate) fn render_top_panel(&self,ctx : &CtxRef) -> () {
+    pub(crate) fn render_top_panel(&mut self,ctx : &CtxRef,frame : &mut eframe::epi::Frame<'_>) -> () {
         //define a topBottomPanel wodget
         TopBottomPanel::top("top_panel").show(ctx, |ui|{
             //then two layout widgets
@@ -71,8 +86,14 @@ impl Headlines {
                 //button controller on the right
                 ui.with_layout(Layout::right_to_left(), |ui|{
                     let close_btn = ui.add(Button::new("❌").text_style(egui::TextStyle::Body));
+                    if(close_btn.clicked()){
+                        frame.quit();
+                    }
                     let refresh_btn = ui.add(Button::new("🔄").text_style(egui::TextStyle::Body));
                     let theme_btn = ui.add(Button::new("🌙").text_style(egui::TextStyle::Body));
+                    if(theme_btn.clicked()){
+                        self.config.dark_mode = !self.config.dark_mode;
+                    }
                 }); 
                 //padding before after the pannel
                 
