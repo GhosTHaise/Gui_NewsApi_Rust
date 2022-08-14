@@ -10,22 +10,16 @@ const BLACK : Color32 =  Color32::from_rgb(0, 0, 0) ;
 
 #[derive(Serialize,Deserialize)]
 pub struct HeadlinesConfig {
-   pub  dark_mode: bool
+   pub  dark_mode: bool,
+   pub api_key: String
 }
 
 impl Default for HeadlinesConfig{
     fn default() -> Self {
         Self { 
-            dark_mode: Default::default()
+            dark_mode: Default::default(),
+            api_key : String::new()
          }
-    }
-}
-
-impl HeadlinesConfig {
-    fn new() -> Self {
-        Self { 
-            dark_mode: true 
-        }
     }
 }
 
@@ -126,9 +120,19 @@ impl Headlines {
         //add a menu bar
 
     }
-    pub fn render_config(&self,ctx:&CtxRef){
+    pub fn render_config(&mut self,ctx:&CtxRef){
         Window::new("Configuration").show(ctx,|ui|{
             ui.label("Enter your API_KEY for newsapi.org");
+            let text_input = ui.text_edit_singleline(&mut self.config.api_key);
+            tracing::error!("{}",&self.config.api_key);
+            ui.label("If you havn-t registered for the API_KEY,head over to");
+        if text_input.lost_focus() && ui.input().key_pressed(egui::Key::Enter){
+            confy::store("headlines", HeadlinesConfig {
+                    dark_mode: self.config.dark_mode,
+                    api_key: self.config.api_key.to_string()
+            });
+        }
+            ui.hyperlink("https://newsapi.org");
         });
     }
 }
