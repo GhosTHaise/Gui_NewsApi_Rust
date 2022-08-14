@@ -1,6 +1,6 @@
 
 use std::{borrow::Cow};
-use eframe::{egui::{FontDefinitions, FontFamily, Color32, Label, Layout, Hyperlink, Separator, Ui, TopBottomPanel, CtxRef, TextStyle, self, Button}};
+use eframe::{egui::{FontDefinitions, FontFamily, Color32, Label, Layout, Hyperlink, Separator, Ui, TopBottomPanel, CtxRef, TextStyle, self, Button, Window}};
 use serde::{Serialize,Deserialize};
 
 const PADDING : f32 = 5.0;
@@ -70,9 +70,9 @@ impl Headlines {
             //render title
             let title = format!("🔹 {}",a.title);
             if self.config.dark_mode {
-                ui.colored_label(BLACK, title);
-            }else{
                 ui.colored_label(WHITE, title);
+            }else{
+                ui.colored_label(BLACK, title);
             }
             
             //render desc
@@ -124,12 +124,13 @@ impl Headlines {
             ui.add_space(15.);
         });
         //add a menu bar
-        
-        
-        
-      
-    }
 
+    }
+    pub fn render_config(&self,ctx:&CtxRef){
+        Window::new("Configuration").show(ctx,|ui|{
+            ui.label("Enter your API_KEY for newsapi.org");
+        });
+    }
 }
 
 pub fn render_footer(ctx : &CtxRef) -> () {

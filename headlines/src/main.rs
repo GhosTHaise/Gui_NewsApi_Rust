@@ -14,11 +14,14 @@ impl App for Headlines{
     }
     fn update(&mut self, ctx: &eframe::egui::CtxRef, frame: &mut eframe::epi::Frame<'_>) {
 
-        if self.config.dark_mode {
+        if self.config.dark_mode  {
             ctx.set_visuals(Visuals::dark());
         }else{
             ctx.set_visuals(Visuals::light());
         }
+
+        self.render_config(ctx);
+
         self.render_top_panel(ctx,frame); 
         CentralPanel::default().show(ctx, |ui|{
             render_header(ui);
@@ -36,6 +39,7 @@ impl App for Headlines{
 
 
 fn main() -> () {
+    tracing_subscriber::fmt::init();
     let app = Headlines::new();
     let mut win_options = NativeOptions::default();
     win_options.initial_window_size = Some(Vec2::new(600., 650.));
