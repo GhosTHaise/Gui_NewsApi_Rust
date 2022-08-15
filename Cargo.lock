@@ -841,6 +841,7 @@ version = "0.1.0"
 dependencies = [
  "confy",
  "eframe",
+ "newsApi",
  "serde",
  "tracing",
  "tracing-subscriber",

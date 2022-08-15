@@ -24,8 +24,9 @@ impl Default for HeadlinesConfig{
 }
 
 pub struct Headlines{
-    articles : Vec<NewsCardData>,
-    pub config : HeadlinesConfig
+    pub articles : Vec<NewsCardData>,
+    pub config : HeadlinesConfig,
+    pub api_key_initialized: bool
 }
 impl Headlines {
     pub fn new() -> Headlines {
@@ -38,7 +39,8 @@ impl Headlines {
         let config : HeadlinesConfig = confy::load("headlines").unwrap_or_default();
         Headlines { 
             articles : Vec::from_iter(iter),
-            config 
+            config,
+            api_key_initialized : false
          }
     }
     pub fn configure_fonts(&self,ctx: &eframe::egui::CtxRef) -> () {
@@ -133,7 +135,8 @@ impl Headlines {
             }){
                  tracing::error!("failed saving app state : {}",e);
             }
-            tracing::error!("api key set";)
+            self.api_key_initialized = true;
+            tracing::error!("api key set");
         }
             ui.hyperlink("https://newsapi.org");
         });
@@ -170,8 +173,8 @@ pub fn render_header(ui : &mut Ui) -> () {
     let sep = Separator::default().spacing(20.);
     ui.add(sep);
 }
-struct NewsCardData{
-    title : String,
-    desc : String,
-    url : String
+pub struct NewsCardData{
+    pub title : String,
+    pub desc : String,
+    pub url : String
 }
