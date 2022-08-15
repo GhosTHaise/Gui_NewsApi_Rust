@@ -127,10 +127,13 @@ impl Headlines {
             tracing::error!("{}",&self.config.api_key);
             ui.label("If you havn-t registered for the API_KEY,head over to");
         if text_input.lost_focus() && ui.input().key_pressed(egui::Key::Enter){
-            confy::store("headlines", HeadlinesConfig {
+            if let Err(e) = confy::store("headlines", HeadlinesConfig {
                     dark_mode: self.config.dark_mode,
                     api_key: self.config.api_key.to_string()
-            });
+            }){
+                 tracing::error!("failed saving app state : {}",e);
+            }
+            tracing::error!("api key set";)
         }
             ui.hyperlink("https://newsapi.org");
         });
