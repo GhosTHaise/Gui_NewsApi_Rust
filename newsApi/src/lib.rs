@@ -37,7 +37,7 @@ impl NewsApiResponse {
 pub struct Article{
     title : String,
     url: String,
-    desc : String
+    description : String
 }
 
 impl Article {
@@ -48,7 +48,7 @@ impl Article {
         &self.url
     }
     pub fn desc(&self) -> &str{
-        &self.desc
+        &self.description
     }
 }
 
@@ -117,6 +117,7 @@ impl NewsApi {
         let url :String = self.prepare_url()?;
         let req = ureq::get(&url).set("Authorization", &self.api_key);
         let response : NewsApiResponse = req.call()?.into_json()?;
+        println!("{:?}",response);
         match response.status.as_str() {
             "ok" => return Ok(response),
             _ => return Err(NewsApi::map_response_error(response.code))

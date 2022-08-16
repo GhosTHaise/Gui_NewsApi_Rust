@@ -8,6 +8,7 @@ fn fetch_news(api_key: &str,articles: &mut Vec<NewsCardData>) -> () {
     if let Ok(response) = NewsApi::new(api_key).fetch(){
         let response_articles = response.articles();
         for a in response_articles.iter(){
+            println!("{}",a.title().to_string());
             let news = NewsCardData{
                 title : a.title().to_string(),
                 url: a.url().to_string(),
@@ -15,8 +16,9 @@ fn fetch_news(api_key: &str,articles: &mut Vec<NewsCardData>) -> () {
                 desc : a.desc().to_string()
             };
             articles.push(news);
-            
         }
+    }else{
+        println!("unable to fecth api");
     }
 }
 impl App for Headlines{
@@ -26,7 +28,9 @@ impl App for Headlines{
             _frame: &mut eframe::epi::Frame<'_>,
             _storage: Option<&dyn eframe::epi::Storage>,
         ) {
+        println!("start to fetch {:?}",NewsApi::new(&self.config.api_key).fetch());
         fetch_news(&self.config.api_key,&mut self.articles);
+        println!("end to fectch");
         self.configure_fonts(ctx);
     }
     fn update(&mut self, ctx: &eframe::egui::CtxRef, frame: &mut eframe::epi::Frame<'_>) {

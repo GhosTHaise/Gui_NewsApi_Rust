@@ -30,17 +30,11 @@ pub struct Headlines{
 }
 impl Headlines {
     pub fn new() -> Headlines {
-        let iter = (0..20).map(|a| NewsCardData{
-            title: format!("Title{}",a),
-            desc: format!("desc{}",a),
-            url: format!("https://example.com/{}",a)
-        });
-
         let config : HeadlinesConfig = confy::load("headlines").unwrap_or_default();
-        Headlines { 
-            articles : Vec::from_iter(iter),
-            config,
-            api_key_initialized : false
+        Headlines {
+            api_key_initialized : !config.api_key.is_empty(),
+            articles : vec![],
+            config
          }
     }
     pub fn configure_fonts(&self,ctx: &eframe::egui::CtxRef) -> () {
@@ -63,6 +57,7 @@ impl Headlines {
         for a in &self.articles{
             //Add padding top
             ui.add_space(PADDING);
+            //print!("title : {}",a.title);
             //render title
             let title = format!("🔹 {}",a.title);
             if self.config.dark_mode {
