@@ -1,25 +1,13 @@
 mod headlines;
 
+use std::{thread, sync::mpsc};
+
 use eframe::{epi::App, egui::{CentralPanel, ScrollArea, Vec2, Visuals}, NativeOptions, run_native};
 use headlines::{Headlines, render_header, render_footer, NewsCardData};
 use newsApi::NewsApi;
 
 fn fetch_news(api_key: &str,articles: &mut Vec<NewsCardData>) -> () {
-    if let Ok(response) = NewsApi::new(api_key).fetch(){
-        let response_articles = response.articles();
-        for a in response_articles.iter(){
-            println!("{}",a.title().to_string());
-            let news = NewsCardData{
-                title : a.title().to_string(),
-                url: a.url().to_string(),
-                //desc : a.desc().map(|s)| s.to_string()).unwrap_or("...".to_string); 
-                desc : a.desc().to_string()
-            };
-            articles.push(news);
-        }
-    }else{
-        println!("unable to fecth api");
-    }
+    
 }
 impl App for Headlines{
     fn setup(
@@ -28,8 +16,32 @@ impl App for Headlines{
             _frame: &mut eframe::epi::Frame<'_>,
             _storage: Option<&dyn eframe::epi::Storage>,
         ) {
-        println!("start to fetch {:?}",NewsApi::new(&self.config.api_key).fetch());
-        fetch_news(&self.config.api_key,&mut self.articles);
+        //println!("start to fetch {:?}",NewsApi::new(&self.config.api_key).fetch());
+        let (news_tx,news_rx) = mpsc::channel();
+        
+        let api_key = self.config.api_key.to_string();
+        self.news_rx = Some(news_rx);    
+
+        thread::spawn(move || {
+            if let Ok(response) = NewsApi::new(&api_key).fetch(){
+                let response_articles = response.articles();
+                for a in response_articles.iter(){
+                    println!("{}",a.title().to_string());
+                    let news = NewsCardData{
+                        title : a.title().to_string(),
+                        url: a.url().to_string(),
+                        //desc : a.desc().map(|s)| s.to_string()).unwrap_or("...".to_string); 
+                        desc : a.desc().to_string()
+                    };
+                    if let Err(e) = news_tx.send(news) {
+                        tracing::error!("Error sending news data : {}",e);
+                    }
+            }
+        }else{
+            println!("unable to fecth api");
+        }
+    });
+
         println!("end to fectch");
         self.configure_fonts(ctx);
     }
@@ -44,13 +56,15 @@ impl App for Headlines{
         if !self.api_key_initialized{
             self.render_config(ctx);
         }else{
+            self.preload_articles();
             self.render_top_panel(ctx,frame); 
             CentralPanel::default().show(ctx, |ui|{
                 render_header(ui);
                 ScrollArea::auto_sized().show(ui, |ui|{
                     self.render_news_cards(ui);
                 });
-            render_footer(ctx);
+                //ui.add_space(20.);
+                render_footer(ctx);
         });
         }   
     }

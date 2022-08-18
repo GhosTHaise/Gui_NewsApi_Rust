@@ -1,5 +1,5 @@
 
-use std::{borrow::Cow};
+use std::{borrow::Cow, sync::mpsc::Receiver};
 use eframe::{egui::{FontDefinitions, FontFamily, Color32, Label, Layout, Hyperlink, Separator, Ui, TopBottomPanel, CtxRef, TextStyle, self, Button, Window}};
 use serde::{Serialize,Deserialize};
 
@@ -26,7 +26,8 @@ impl Default for HeadlinesConfig{
 pub struct Headlines{
     pub articles : Vec<NewsCardData>,
     pub config : HeadlinesConfig,
-    pub api_key_initialized: bool
+    pub api_key_initialized: bool,
+    pub news_rx : Option<Receiver<NewsCardData>>
 }
 impl Headlines {
     pub fn new() -> Headlines {
@@ -34,7 +35,8 @@ impl Headlines {
         Headlines {
             api_key_initialized : !config.api_key.is_empty(),
             articles : vec![],
-            config
+            config,
+            news_rx : None
          }
     }
     pub fn configure_fonts(&self,ctx: &eframe::egui::CtxRef) -> () {
@@ -53,6 +55,9 @@ impl Headlines {
         ctx.set_fonts(font_def)   ;                      
 
     }
+
+    
+
     pub fn render_news_cards(&self,ui : &mut eframe::egui::Ui) -> () {
         for a in &self.articles{
             //Add padding top
@@ -115,8 +120,22 @@ impl Headlines {
             ui.add_space(15.);
         });
         //add a menu bar
-
+    
     }
+
+    pub fn preload_articles(&mut self){
+        if let Some(rx) = &self.news_rx {
+            match rx.try_recv() {
+                Ok(news_data) => {
+                    self.articles.push(news_data)
+                },
+                Err(e) => {
+                    tracing::warn!("Error receiving msg : {}",e);
+                }
+            }
+        }
+    }
+    
     pub fn render_config(&mut self,ctx:&CtxRef){
         Window::new("Configuration").show(ctx,|ui|{
             ui.label("Enter your API_KEY for newsapi.org");
