@@ -1,13 +1,31 @@
 mod headlines;
 
-use std::{thread, sync::mpsc};
+use std::{thread, sync::mpsc::{self, sync_channel}};
 
 use eframe::{epi::App, egui::{CentralPanel, ScrollArea, Vec2, Visuals}, NativeOptions, run_native};
 use headlines::{Headlines, render_header, render_footer, NewsCardData};
 use newsApi::NewsApi;
 
-fn fetch_news(api_key: &str,articles: &mut Vec<NewsCardData>) -> () {
-    
+use crate::headlines::Msg;
+
+fn fetch_news(api_key: &str,news_tx : &mut std::sync::mpsc::Sender<NewsCardData>) -> () {
+    if let Ok(response) = NewsApi::new(&api_key).fetch(){
+        let response_articles = response.articles();
+        for a in response_articles.iter(){
+            println!("{}",a.title().to_string());
+            let news = NewsCardData{
+                title : a.title().to_string(),
+                url: a.url().to_string(),
+                //desc : a.desc().map(|s)| s.to_string()).unwrap_or("...".to_string); 
+                desc : a.desc().to_string()
+            };
+            if let Err(e) = news_tx.send(news) {
+                tracing::error!("Error sending news data : {}",e);
+            }
+    }
+}else{
+    println!("unable to fecth api");
+    }
 }
 impl App for Headlines{
     fn setup(
@@ -17,11 +35,28 @@ impl App for Headlines{
             _storage: Option<&dyn eframe::epi::Storage>,
         ) {
         //println!("start to fetch {:?}",NewsApi::new(&self.config.api_key).fetch());
-        let (news_tx,news_rx) = mpsc::channel();
-        
+        let (mut news_tx,news_rx) = mpsc::channel();
+        let (app_tx,app_rx) = sync_channel(1);
         let api_key = self.config.api_key.to_string();
+
+        self.app_tx = Some(app_tx);
+
         self.news_rx = Some(news_rx);    
 
+        if !api_key.is_empty() {
+            fetch_news(&api_key, &mut news_tx);
+        }else{
+            loop{
+                match app_rx.recv(){
+                    Ok(Msg::ApiKeySet(api_key)) => {
+                         fetch_news(&api_key, &mut news_tx)
+                    }
+                    Err(e) => {
+                        tracing::error!("failed receiving msg : {}",e)
+                    }
+                }
+            }
+        }
         thread::spawn(move || {
             if let Ok(response) = NewsApi::new(&api_key).fetch(){
                 let response_articles = response.articles();
@@ -46,6 +81,8 @@ impl App for Headlines{
         self.configure_fonts(ctx);
     }
     fn update(&mut self, ctx: &eframe::egui::CtxRef, frame: &mut eframe::epi::Frame<'_>) {
+
+        ctx.request_repaint();
 
         if self.config.dark_mode  {
             ctx.set_visuals(Visuals::dark());

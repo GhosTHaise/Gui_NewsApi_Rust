@@ -1,5 +1,5 @@
 
-use std::{borrow::Cow, sync::mpsc::Receiver};
+use std::{borrow::Cow, sync::mpsc::{Receiver, SyncSender}, option};
 use eframe::{egui::{FontDefinitions, FontFamily, Color32, Label, Layout, Hyperlink, Separator, Ui, TopBottomPanel, CtxRef, TextStyle, self, Button, Window}};
 use serde::{Serialize,Deserialize};
 
@@ -8,6 +8,9 @@ const WHITE: Color32 = Color32::from_rgb(255, 255, 255);
 const CYAN: Color32 = Color32::from_rgb(0, 250, 250);
 const BLACK : Color32 =  Color32::from_rgb(0, 0, 0) ;
 
+pub enum Msg {
+    ApiKeySet(String)
+}
 #[derive(Serialize,Deserialize)]
 pub struct HeadlinesConfig {
    pub  dark_mode: bool,
@@ -27,7 +30,8 @@ pub struct Headlines{
     pub articles : Vec<NewsCardData>,
     pub config : HeadlinesConfig,
     pub api_key_initialized: bool,
-    pub news_rx : Option<Receiver<NewsCardData>>
+    pub news_rx : Option<Receiver<NewsCardData>>,
+    pub app_tx : Option<SyncSender<Msg>>
 }
 impl Headlines {
     pub fn new() -> Headlines {
@@ -36,7 +40,8 @@ impl Headlines {
             api_key_initialized : !config.api_key.is_empty(),
             articles : vec![],
             config,
-            news_rx : None
+            news_rx : None,
+            app_tx : None
          }
     }
     pub fn configure_fonts(&self,ctx: &eframe::egui::CtxRef) -> () {
@@ -150,6 +155,11 @@ impl Headlines {
                  tracing::error!("failed saving app state : {}",e);
             }
             self.api_key_initialized = true;
+
+            if let Some(tx) =  &self.app_tx {
+                tx.send(Msg::ApiKeySet(self.config.api_key.to_string()));
+            }
+
             tracing::error!("api key set");
         }
             ui.hyperlink("https://newsapi.org");
