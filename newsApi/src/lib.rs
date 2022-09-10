@@ -160,6 +160,12 @@ impl NewsApi {
             _ => return Err(NewsApi::map_response_error(response.code))
         } 
     }
+
+    #[cfg(target_arch = "wasm32")]
+    pub async fn fecth_web(&self) -> Result<NewsApiResponse,NewsApiError> {
+        todo!()
+    }
+
     fn map_response_error(code : Option<String>) -> NewsApiError {
         if let Some(code ) = code{
             match code.as_str() {
