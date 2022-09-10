@@ -163,7 +163,23 @@ impl NewsApi {
 
     #[cfg(target_arch = "wasm32")]
     pub async fn fecth_web(&self) -> Result<NewsApiResponse,NewsApiError> {
-        todo!()
+        let url = self.prepare_url()?;
+        let req = reqwasm::http::Request::get(&url)
+        .header("Authorization",&self.api_key);
+
+        let resp = req
+        .send()
+        .await
+        .map_err(|_| NewsApiError::BadRequest("Failed sending request ."))?;
+    let response :NewsApiResponse = resp
+    .json()
+    .await
+    .map_err(|_| NewsApiError::BadRequest("failes converting response to json ."))?;    
+
+    match response.status.as_str() {
+        "ok" => return Ok(response),
+        _ => return Err(NewsApi::map_response_error(response.code)),
+    }
     }
 
     fn map_response_error(code : Option<String>) -> NewsApiError {
