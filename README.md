@@ -12,3 +12,6 @@ rustup target add wasm32-unknown-unknown
 ```shell
 cargo build --target wasm32-unknown-unknown
 ```
+
+Run app with libraries not in wasm target :
+cargo build --lib -p headlines --target wasm32-unknown-unknown
