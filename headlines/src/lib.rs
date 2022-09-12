@@ -58,6 +58,7 @@ impl App for Headlines{
                 }
             }
         }
+        
         thread::spawn(move || {
             if let Ok(response) = NewsApi::new(&api_key).fetch(){
                 let response_articles = response.articles();
