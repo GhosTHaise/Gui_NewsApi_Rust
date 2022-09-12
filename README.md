@@ -15,3 +15,5 @@ cargo build --target wasm32-unknown-unknown
 
 Run app with libraries not in wasm target :
 cargo build --lib -p headlines --target wasm32-unknown-unknown
+Mode Release : 
+cargo build --release -p headlines --target wasm32-unknown-unknown

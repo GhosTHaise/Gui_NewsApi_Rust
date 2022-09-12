@@ -900,7 +900,8 @@ dependencies = [
  "newsApi",
  "serde",
  "tracing",
- "tracing-subscriber",
+ "tracing-subscriber 0.2.25",
+ "tracing-wasm",
 ]
 
 [[package]]
@@ -2231,6 +2232,28 @@ dependencies = [
  "tracing-core",
  "tracing-log",
  "tracing-serde",
+]
+
+[[package]]
+name = "tracing-subscriber"
+version = "0.3.15"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "60db860322da191b40952ad9affe65ea23e7dd6a5c442c2c42865810c6ab8e6b"
+dependencies = [
+ "sharded-slab",
+ "thread_local",
+ "tracing-core",
+]
+
+[[package]]
+name = "tracing-wasm"
+version = "0.2.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "4575c663a174420fa2d78f4108ff68f65bf2fbb7dd89f33749b6e826b3626e07"
+dependencies = [
+ "tracing",
+ "tracing-subscriber 0.3.15",
+ "wasm-bindgen",
 ]
 
 [[package]]
