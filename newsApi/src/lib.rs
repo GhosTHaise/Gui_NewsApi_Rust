@@ -162,7 +162,7 @@ impl NewsApi {
     }
 
     #[cfg(target_arch = "wasm32")]
-    pub async fn fecth_web(&self) -> Result<NewsApiResponse,NewsApiError> {
+    pub async fn fetch_web(&self) -> Result<NewsApiResponse,NewsApiError> {
         let url = self.prepare_url()?;
         let req = reqwasm::http::Request::get(&url)
         .header("Authorization",&self.api_key);

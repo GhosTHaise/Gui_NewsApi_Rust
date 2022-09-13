@@ -27,7 +27,26 @@ fn fetch_news(api_key: &str,news_tx : &mut std::sync::mpsc::Sender<NewsCardData>
     println!("unable to fecth api");
     }
 }
-
+#[cfg(target_arch = "wasm32")]
+async fn fetch_web(api_key: String,news_tx : std::sync::mpsc::Sender<NewsCardData>) -> () {
+    if let Ok(response) = NewsApi::new(&api_key).fetch_web().await {
+        let response_articles = response.articles();
+        for a in response_articles.iter(){
+            println!("{}",a.title().to_string());
+            let news = NewsCardData{
+                title : a.title().to_string(),
+                url: a.url().to_string(),
+                //desc : a.desc().map(|s)| s.to_string()).unwrap_or("...".to_string); 
+                desc : a.desc().to_string()
+            };
+            if let Err(e) = news_tx.send(news) {
+                tracing::error!("Error sending news data : {}",e);
+            }
+    }
+}else{
+    println!("unable to fecth api");
+    }
+}
 impl App for Headlines{
     fn setup(
             &mut self,
@@ -66,10 +85,10 @@ impl App for Headlines{
     });
 
         
-
+        //load only on web
         #[cfg(target_arch = "wasm32")]
         gloo_timers::callback::Timeout::new(10,move || {
-            fetch_web();
+            fetch_web(api_key_web,news_tx_web);
         }).forget();
 
         println!("end to fectch");
