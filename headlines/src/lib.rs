@@ -1,6 +1,6 @@
 mod headlines;
 
-use std::{thread, sync::mpsc::{self, sync_channel}};
+use std::{thread, sync::mpsc::{self, sync_channel, Sender}};
 
 use eframe::{epi::App, egui::{CentralPanel, ScrollArea,Visuals}};
 pub use headlines::{Headlines, render_header, render_footer, NewsCardData};
@@ -43,41 +43,34 @@ impl App for Headlines{
         self.app_tx = Some(app_tx);
 
         self.news_rx = Some(news_rx);    
-
-        if !api_key.is_empty() {
-            fetch_news(&api_key, &mut news_tx);
-        }else{
-            loop{
-                match app_rx.recv(){
-                    Ok(Msg::ApiKeySet(api_key)) => {
-                         fetch_news(&api_key, &mut news_tx)
-                    }
-                    Err(e) => {
-                        tracing::error!("failed receiving msg : {}",e)
+        
+        let api_key_web : String = api_key.clone();
+        let news_tx_web : Sender<NewsCardData> = news_tx.clone();    
+       
+        #[cfg(not(target_arch = "wasm32"))]
+        thread::spawn(move || {
+            if !api_key.is_empty() {
+                fetch_news(&api_key, &mut news_tx);
+            }else{
+                loop{
+                    match app_rx.recv(){
+                        Ok(Msg::ApiKeySet(api_key)) => {
+                             fetch_news(&api_key, &mut news_tx)
+                        }
+                        Err(e) => {
+                            tracing::error!("failed receiving msg : {}",e)
+                        }
                     }
                 }
             }
-        }
-        
-        thread::spawn(move || {
-            if let Ok(response) = NewsApi::new(&api_key).fetch(){
-                let response_articles = response.articles();
-                for a in response_articles.iter(){
-                    println!("{}",a.title().to_string());
-                    let news = NewsCardData{
-                        title : a.title().to_string(),
-                        url: a.url().to_string(),
-                        //desc : a.desc().map(|s)| s.to_string()).unwrap_or("...".to_string); 
-                        desc : a.desc().to_string()
-                    };
-                    if let Err(e) = news_tx.send(news) {
-                        tracing::error!("Error sending news data : {}",e);
-                    }
-            }
-        }else{
-            println!("unable to fecth api");
-        }
     });
+
+        
+
+        #[cfg(target_arch = "wasm32")]
+        gloo_timers::callback::Timeout::new(10,move || {
+            fetch_web();
+        }).forget();
 
         println!("end to fectch");
         self.configure_fonts(ctx);
