@@ -23,7 +23,7 @@ pub enum NewsApiError{
 } 
 #[derive(Deserialize,Debug)]
 pub struct NewsApiResponse {
-    status:String,
+    status: String,
     pub articles : Vec<Article>,
     code:Option<String>
 }
@@ -115,7 +115,13 @@ impl NewsApi {
     }
     pub fn fetch(&self) -> Result<NewsApiResponse,NewsApiError>{
         let url :String = self.prepare_url()?;
-        let req = ureq::get(&url).set("Authorization", &self.api_key);
+        println!("url : {}",&url);
+        let req = ureq::get(&url)
+        .set("Authorization", &self.api_key);
+        let req2 = ureq::get(&url)
+        .set("Authorization", &self.api_key);
+        println!("Second request : {:?}",req2.call()?.into_json()?);
+
         let response : NewsApiResponse = req.call()?.into_json()?;
         //println!("{:?}",response);
         match response.status.as_str() {

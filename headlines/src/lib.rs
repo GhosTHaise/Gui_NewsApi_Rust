@@ -9,6 +9,7 @@ use newsApi::NewsApi;
 use crate::headlines::Msg;
 
 fn fetch_news(api_key: &str,news_tx : &mut std::sync::mpsc::Sender<NewsCardData>) -> () {
+    dbg!(NewsApi::new(&api_key).fetch());
     if let Ok(response) = NewsApi::new(&api_key).fetch(){
         let response_articles = response.articles();
         for a in response_articles.iter(){
@@ -88,7 +89,20 @@ impl App for Headlines{
         //load only on web
         #[cfg(target_arch = "wasm32")]
         gloo_timers::callback::Timeout::new(10,move || {
-            fetch_web(api_key_web,news_tx_web);
+            wasm_bindgen_futures::spawn_local(async{
+                fetch_web(api_key_web,news_tx_web).await;
+            });
+        }).forget();
+        #[cfg(target_arch = "wasm32")]
+        gloo_timers::callback::Interval::new(500,move || {
+            match app_rx.try_recv(){
+                Ok(Msg::ApiKeySet(api_key)) => {
+                    wasm_bindgen_futures::spawn_local(fetch_web(api_key.clone(),news_tx.clone()));
+                }
+                Err(e) => {
+                    tracing::error!("failed receiving msg : {}",e);
+                }
+            }
         }).forget();
 
         println!("end to fectch");

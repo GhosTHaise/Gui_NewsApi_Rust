@@ -913,6 +913,7 @@ dependencies = [
  "tracing",
  "tracing-subscriber 0.2.25",
  "tracing-wasm",
+ "wasm-bindgen-futures",
 ]
 
 [[package]]
