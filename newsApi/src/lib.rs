@@ -120,7 +120,7 @@ impl NewsApi {
         .set("Authorization", &self.api_key);
         let req2 = ureq::get(&url)
         .set("Authorization", &self.api_key);
-        println!("Second request : {:?}",req2.call()?.into_json()?);
+        println!("Second request : {:#?}",req2.call()?);
 
         let response : NewsApiResponse = req.call()?.into_json()?;
         //println!("{:?}",response);
