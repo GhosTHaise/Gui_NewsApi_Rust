@@ -9,7 +9,7 @@ use newsApi::NewsApi;
 use crate::headlines::Msg;
 
 fn fetch_news(api_key: &str,news_tx : &mut std::sync::mpsc::Sender<NewsCardData>) -> () {
-    dbg!(NewsApi::new(&api_key).fetch());
+    //dbg!(NewsApi::new(&api_key).fetch());
     if let Ok(response) = NewsApi::new(&api_key).fetch(){
         let response_articles = response.articles();
         for a in response_articles.iter(){
@@ -75,7 +75,10 @@ impl App for Headlines{
                 loop{
                     match app_rx.recv(){
                         Ok(Msg::ApiKeySet(api_key)) => {
-                             fetch_news(&api_key, &mut news_tx)
+                            fetch_news(&api_key, &mut news_tx)
+                        }
+                        Ok(Msg::Refresh) => {
+                            fetch_news(&api_key, &mut news_tx)
                         }
                         Err(e) => {
                             tracing::error!("failed receiving msg : {}",e)
@@ -97,6 +100,9 @@ impl App for Headlines{
         gloo_timers::callback::Interval::new(500,move || {
             match app_rx.try_recv(){
                 Ok(Msg::ApiKeySet(api_key)) => {
+                    wasm_bindgen_futures::spawn_local(fetch_web(api_key.clone(),news_tx.clone()));
+                }
+                Ok(Msg::Refresh) => {
                     wasm_bindgen_futures::spawn_local(fetch_web(api_key.clone(),news_tx.clone()));
                 }
                 Err(e) => {
@@ -124,12 +130,19 @@ impl App for Headlines{
             self.preload_articles();
             self.render_top_panel(ctx,frame); 
             CentralPanel::default().show(ctx, |ui|{
-                render_header(ui);
-                ScrollArea::auto_sized().show(ui, |ui|{
-                    self.render_news_cards(ui);
-                });
-                //ui.add_space(20.);
-                render_footer(ctx);
+
+                if self.articles.is_empty(){
+                    ui.vertical_centered_justified(|ui|{
+                        ui.heading("Loading ⏳")
+                    });
+                }else{
+                    render_header(ui);
+                    ScrollArea::auto_sized().show(ui, |ui|{
+                        self.render_news_cards(ui);
+                    });
+                    //ui.add_space(20.);
+                    render_footer(ctx);
+                }
         });
         }   
     }
