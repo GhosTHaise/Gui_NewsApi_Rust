@@ -1,6 +1,6 @@
 
 use std::{borrow::Cow, sync::mpsc::{Receiver, SyncSender}, option};
-use eframe::{egui::{FontDefinitions, FontFamily, Color32, Label, Layout, Hyperlink, Separator, Ui, TopBottomPanel, CtxRef, TextStyle, self, Button, Window, CentralPanel}};
+use eframe::{egui::{FontDefinitions, FontFamily, Color32, Label, Layout, Hyperlink, Separator, Ui, TopBottomPanel, Context, TextStyle, self, Button, Window, CentralPanel, FontData, RichText}};
 use serde::{Serialize,Deserialize};
 
 const PADDING : f32 = 5.0;
@@ -12,6 +12,7 @@ pub enum Msg {
     ApiKeySet(String),
     Refresh
 }
+
 #[derive(Serialize,Deserialize)]
 pub struct HeadlinesConfig {
    pub  dark_mode: bool,
@@ -45,18 +46,22 @@ impl Headlines {
             app_tx : None
          }
     }
-    pub fn configure_fonts(&self,ctx: &eframe::egui::CtxRef) -> () {
+    pub fn configure_fonts(&self,ctx: &eframe::egui::Context) -> () {
         // create font def object
         let mut font_def = FontDefinitions::default();
         // then we we'll load the font
-        font_def.font_data.insert("Spartan".to_string(), Cow::Borrowed(include_bytes!("../../Spartan-VariableFont_wght.ttf")));
+        font_def.font_data.insert("Spartan".to_string(), 
+            FontData::from_static(include_bytes!("../../Spartan-VariableFont_wght.ttf")));
         // then set the sowe of different text styles
-        font_def.family_and_size.insert(eframe::egui::TextStyle::Heading,(FontFamily::Proportional,35.));
-        font_def.family_and_size.insert(eframe::egui::TextStyle::Body,(FontFamily::Proportional,16.));
+
+        //deprecated
+        //font_def.family_and_size.insert(eframe::egui::TextStyle::Heading,(FontFamily::Proportional,35.));
+        //.family_and_size.insert(eframe::egui::TextStyle::Body,(FontFamily::Proportional,16.));
         
-        font_def.fonts_for_family.get_mut(&FontFamily::Proportional)
-                                 .unwrap()
-                                 .insert(0,"Spartan".to_string());
+        font_def.families
+                .get_mut(&FontFamily::Proportional)
+                .unwrap()
+                .insert(0,"Spartan".to_string());
         // load font using context object
         ctx.set_fonts(font_def)   ;                      
 
@@ -79,20 +84,20 @@ impl Headlines {
             
             //render desc
             ui.add_space(PADDING);
-            let desc = Label::new(&a.desc).text_style(eframe::egui::TextStyle::Button);
+            let desc = Label::new(RichText::new(&a.desc).text_style(eframe::egui::TextStyle::Button));
             ui.add(desc);
             
             //render hyperlinks
             ui.style_mut().visuals.hyperlink_color = CYAN;
             ui.add_space(PADDING);
             ui.with_layout(Layout::right_to_left(), |ui|{
-                ui.add(Hyperlink::new(&a.url).text("read more 🔜"))
+                ui.add(Hyperlink::from_label_and_url("read more 🔜",&a.url));
             });
             ui.add_space(PADDING);
             ui.add(Separator::default());
         }
     }
-    pub(crate) fn render_top_panel(&mut self,ctx : &CtxRef,frame : &mut eframe::epi::Frame<'_>) -> () {
+    pub(crate) fn render_top_panel(&mut self,ctx : &Context,frame : &mut eframe::epi::Frame) -> () {
         //define a topBottomPanel wodget
         TopBottomPanel::top("top_panel").show(ctx, |ui|{
             //then two layout widgets
@@ -100,19 +105,19 @@ impl Headlines {
             egui::menu::bar(ui,|ui|{
                 //render the logo on the left
                 ui.with_layout(Layout::left_to_right(), |ui|{
-                    ui.add(Label::new("📓").text_style(egui::TextStyle::Heading));
+                    ui.add(Label::new(RichText::new("📓").text_style(egui::TextStyle::Heading)));
                 });
                 //button controller on the right
                 ui.with_layout(Layout::right_to_left(), |ui|{
                     
                     if !cfg!(target_arch = "wasm32") {
-                        let close_btn = ui.add(Button::new("❌").text_style(egui::TextStyle::Body));
+                        let close_btn = ui.add(Button::new(RichText::new("❌").text_style(egui::TextStyle::Body)));
                         if close_btn.clicked(){
                             frame.quit();
                         }
                     }
 
-                    let refresh_btn = ui.add(Button::new("🔄").text_style(egui::TextStyle::Body));
+                    let refresh_btn = ui.add(Button::new(RichText::new("🔄").text_style(egui::TextStyle::Body)));
                     if refresh_btn.clicked() {
                         if let Some(tx)  = &self.app_tx{
                             self.articles.clear();
@@ -121,13 +126,13 @@ impl Headlines {
                     }
                     
 
-                    let theme_btn = ui.add(Button::new({
+                    let theme_btn = ui.add(Button::new(RichText::new({
                         if self.config.dark_mode {
                             "🌞"
                         }else{
                             "🌙"
                         }
-                    }).text_style(egui::TextStyle::Body));
+                    }).text_style(egui::TextStyle::Body)));
                     if(theme_btn.clicked()){
                         self.config.dark_mode = !self.config.dark_mode;
                     }
@@ -154,7 +159,7 @@ impl Headlines {
         }
     }
     
-    pub fn render_config(&mut self,ctx:&CtxRef){
+    pub fn render_config(&mut self,ctx:&Context){
         CentralPanel::default().show(ctx, |ui|{
             Window::new("Configuration").show(ctx,|ui|{
                 ui.label("Enter your API_KEY for newsapi.org");
@@ -182,7 +187,7 @@ impl Headlines {
     }
 }
 
-pub fn render_footer(ctx : &CtxRef) -> () {
+pub fn render_footer(ctx : &Context) -> () {
     TopBottomPanel::bottom("footer").show(ctx, |ui|{
         ui.vertical_centered(|ui|{
             ui.add_space(10.);

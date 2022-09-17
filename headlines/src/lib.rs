@@ -51,8 +51,8 @@ async fn fetch_web(api_key: String,news_tx : std::sync::mpsc::Sender<NewsCardDat
 impl App for Headlines{
     fn setup(
             &mut self,
-            ctx: &eframe::egui::CtxRef,
-            _frame: &mut eframe::epi::Frame<'_>,
+            ctx: &eframe::egui::Context,
+            _frame: &eframe::epi::Frame,
             _storage: Option<&dyn eframe::epi::Storage>,
         ) {
         //println!("start to fetch {:?}",NewsApi::new(&self.config.api_key).fetch());
@@ -114,7 +114,7 @@ impl App for Headlines{
         println!("end to fectch");
         self.configure_fonts(ctx);
     }
-    fn update(&mut self, ctx: &eframe::egui::CtxRef, frame: &mut eframe::epi::Frame<'_>) {
+    fn update(&mut self, ctx: &eframe::egui::Context, frame: &eframe::epi::Frame) {
 
         ctx.request_repaint();
 
@@ -128,7 +128,7 @@ impl App for Headlines{
             self.render_config(ctx);
         }else{
             self.preload_articles();
-            self.render_top_panel(ctx,frame); 
+            self.render_top_panel(ctx,&mut frame); 
             CentralPanel::default().show(ctx, |ui|{
 
                 if self.articles.is_empty(){
