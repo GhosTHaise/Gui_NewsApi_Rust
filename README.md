@@ -1,4 +1,9 @@
 # Gui_NewsApi_Rust
+
+find outdated dependencies
+```shell
+cargo outdated
+```
 Install all dependencies with :
 ```shell
     cargo check or cargo update

@@ -97,7 +97,7 @@ impl Headlines {
             ui.add(Separator::default());
         }
     }
-    pub(crate) fn render_top_panel(&mut self,ctx : &Context,frame : &mut eframe::epi::Frame) -> () {
+    pub(crate) fn render_top_panel(&mut self,ctx : &Context,frame : &eframe::epi::Frame) -> () {
         //define a topBottomPanel wodget
         TopBottomPanel::top("top_panel").show(ctx, |ui|{
             //then two layout widgets
@@ -132,7 +132,7 @@ impl Headlines {
                         }else{
                             "🌙"
                         }
-                    }).text_style(egui::TextStyle::Body)));
+                    })));
                     if(theme_btn.clicked()){
                         self.config.dark_mode = !self.config.dark_mode;
                     }
@@ -192,17 +192,22 @@ pub fn render_footer(ctx : &Context) -> () {
         ui.vertical_centered(|ui|{
             ui.add_space(10.);
             //add api source
-            ui.add(Label::new("API source : newsapi.org")
-                .text_color(Color32::from_rgb(160,10,0))
-                .monospace());
+            ui.add(
+                Label::new(RichText::new("API source : newsapi.org")
+                    .small()
+                    .text_style(TextStyle::Monospace)
+            )); 
+                    
             //add link to egui framwork
-            ui.add(Hyperlink::new("https://github.com/emilk/egui")
-                    .text("Made with egui")
-                    .text_style(TextStyle::Monospace));
+            ui.add(Hyperlink::from_label_and_url(
+                "Made with egui",
+                 "https://github.com/emilk/egui")     
+            );
             //put github link to source code
-            ui.add(Hyperlink::new("https://github.com/GhosTHaise/Gui_NewsApi_Rust")
-                    .text("GhosTHaise/Gui_NewsApi_Rust")
-                    .text_style(TextStyle::Monospace));
+            ui.add(Hyperlink::from_label_and_url(
+                "GhosTHaise/Gui_NewsApi_Rust",
+                 "https://github.com/GhosTHaise/Gui_NewsApi_Rust")
+            );
             
             ui.add_space(10.)
         });

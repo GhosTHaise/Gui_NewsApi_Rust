@@ -128,7 +128,7 @@ impl App for Headlines{
             self.render_config(ctx);
         }else{
             self.preload_articles();
-            self.render_top_panel(ctx,&mut frame); 
+            self.render_top_panel(ctx,frame); 
             CentralPanel::default().show(ctx, |ui|{
 
                 if self.articles.is_empty(){
@@ -137,7 +137,7 @@ impl App for Headlines{
                     });
                 }else{
                     render_header(ui);
-                    ScrollArea::auto_sized().show(ui, |ui|{
+                    ScrollArea::vertical().show(ui, |ui|{
                         self.render_news_cards(ui);
                     });
                     //ui.add_space(20.);
