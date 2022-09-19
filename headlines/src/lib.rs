@@ -114,7 +114,7 @@ impl App for Headlines{
         println!("end to fectch");
         self.configure_fonts(ctx);
     }
-    fn update(&mut self, ctx: &eframe::egui::Context, frame: &eframe::epi::Frame) {
+    fn update(&mut self, ctx: &eframe::egui::Context, frame: &mut eframe::epi::Frame) {
 
         ctx.request_repaint();
 
@@ -161,5 +161,5 @@ use eframe::wasm_bindgen::{self,prelude::*};
 pub fn main_web(canvas_id : &str){
     let headlines = Headlines::new();
     tracing_wasm::set_as_global_default();
-    eframe::start_web(canvas_id,Box::new(headlines));
+    eframe::start_web(canvas_id,Box::new( |cc| Box::new(headlines)));
 }
