@@ -97,7 +97,7 @@ impl Headlines {
             ui.add(Separator::default());
         }
     }
-    pub(crate) fn render_top_panel(&mut self,ctx : &Context,frame : &mut eframe::epi::Frame) -> () {
+    pub(crate) fn render_top_panel(&mut self,ctx : &Context,frame : &eframe::epi::Frame) -> () {
         //define a topBottomPanel wodget
         TopBottomPanel::top("top_panel").show(ctx, |ui|{
             //then two layout widgets
