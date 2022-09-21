@@ -27,3 +27,6 @@ Mode Release :
 ```shell
 cargo build --release -p headlines --lib --target wasm32-unknown-unknown
 ```
+
+last version on Eframe : 
+eframe = {git = "https://github.com/emilk/egui" , rev = "95ff7ec", features = ["persistence"]}

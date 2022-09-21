@@ -114,7 +114,7 @@ impl App for Headlines{
         println!("end to fectch");
         self.configure_fonts(ctx);
     }
-    fn update(&mut self, ctx: &eframe::egui::Context, frame: &mut eframe::epi::Frame) {
+    fn update(&mut self, ctx: &eframe::egui::Context, frame: &eframe::epi::Frame) {
 
         ctx.request_repaint();
 
